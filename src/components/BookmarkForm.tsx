@@ -34,7 +34,10 @@ export const BookmarkForm = ({ onBookmarkAdded, onCancel }: BookmarkFormProps) =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!user) return
+    if (!user) {
+      console.error('No user found')
+      return
+    }
     
     if (!title.trim() || !url.trim()) {
       toast({
@@ -55,28 +58,35 @@ export const BookmarkForm = ({ onBookmarkAdded, onCancel }: BookmarkFormProps) =
     }
 
     setLoading(true)
+    console.log('Adding bookmark for user:', user.id)
+    
     try {
+      const bookmarkData = {
+        title: title.trim(),
+        url: url.trim(),
+        description: description.trim() || null,
+        user_id: user.id
+      }
+      
+      console.log('Bookmark data:', bookmarkData)
+
       const { data, error } = await supabase
         .from('bookmarks')
-        .insert([
-          {
-            title: title.trim(),
-            url: url.trim(),
-            description: description.trim() || null,
-            user_id: user.id
-          }
-        ])
+        .insert([bookmarkData])
         .select()
         .single()
+
+      console.log('Insert response:', { data, error })
 
       if (error) {
         console.error('Error adding bookmark:', error)
         toast({
           title: "Error",
-          description: "Failed to add bookmark",
+          description: `Failed to add bookmark: ${error.message}`,
           variant: "destructive"
         })
       } else {
+        console.log('Bookmark added successfully:', data)
         onBookmarkAdded(data)
         setTitle("")
         setUrl("")

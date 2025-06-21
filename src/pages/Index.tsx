@@ -17,12 +17,15 @@ const Index = () => {
   useEffect(() => {
     if (user) {
       fetchBookmarks()
+    } else {
+      setLoading(false)
     }
   }, [user])
 
   const fetchBookmarks = async () => {
     if (!user) return
     
+    console.log('Fetching bookmarks for user:', user.id)
     setLoading(true)
     try {
       const { data, error } = await supabase
@@ -31,18 +34,26 @@ const Index = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
+      console.log('Supabase response:', { data, error })
+
       if (error) {
         console.error('Error fetching bookmarks:', error)
         toast({
           title: "Error",
-          description: "Failed to load bookmarks",
+          description: `Failed to load bookmarks: ${error.message}`,
           variant: "destructive"
         })
       } else {
         setBookmarks(data || [])
+        console.log('Bookmarks loaded:', data?.length || 0)
       }
     } catch (error) {
       console.error('Error:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load bookmarks",
+        variant: "destructive"
+      })
     } finally {
       setLoading(false)
     }

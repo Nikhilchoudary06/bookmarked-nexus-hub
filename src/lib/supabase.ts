@@ -14,3 +14,9 @@ export type Bookmark = {
   user_id: string
   created_at: string
 }
+
+// Helper function to create authenticated client for Clerk users
+export const createAuthenticatedSupabaseClient = (clerkUserId: string) => {
+  // For now, we'll use the regular client since RLS policies will be updated
+  return supabase
+}
